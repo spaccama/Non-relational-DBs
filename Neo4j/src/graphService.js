@@ -1,7 +1,14 @@
 import { getSession } from "./neo4jClient.js";
 
 export async function createUser(name) {
-  // TODO: CREATE node
+  const session = getSession();
+  await session.run(
+    "MERGE (u:User {name: $name}) return u",
+    { name }
+  );
+
+  await session.close();
+  
 }
 
 export async function addFriend(user1, user2) {
