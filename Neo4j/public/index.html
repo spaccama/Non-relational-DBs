@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Neo4j Friends</title>
+</head>
+<body>
+  <h1>Friend Graph</h1>
+
+  <h3>Create User</h3>
+  <input id="userName" placeholder="Name" />
+  <button onclick="createUser()">Create</button>
+
+  <h3>Add Friendship</h3>
+  <input id="user1" placeholder="User 1" />
+  <input id="user2" placeholder="User 2" />
+  <button onclick="addFriend()">Add</button>
+
+  <h3>Get Friends</h3>
+  <input id="searchUser" placeholder="User" />
+  <button onclick="getFriends()">Search</button>
+
+  <p id="resultTitle"></p>
+  <ul id="result"></ul>
+
+  <h3>Delete User</h3>
+  <input id="deleteUser" placeholder="Name" />
+  <button onclick="deleteUser()">Delete</button>
+
+  <script>
+    async function createUser() {
+      const name = document.getElementById("userName").value;
+      await fetch("/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name })
+      });
+
+      alert(`Created User ${name}`);
+    }
+
+    async function addFriend() {
+      const user1 = document.getElementById("user1").value;
+      const user2 = document.getElementById("user2").value;
+
+      await fetch("/friends", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user1, user2 })
+      });
+
+      alert(`${user1} is now a friend of ${user2}`);
+    }
+
+    async function getFriends() {
+      const name = document.getElementById("searchUser").value;
+
+      const res = await fetch(`/friends/${name}`);
+      const data = await res.json();
+
+      const title = document.getElementById("resultTitle");
+      const list = document.getElementById("result");
+      
+      title.innerText = `Here are all the friends of ${name}:`;
+      list.innerHTML = "";
+
+      if (data.length === 0) {
+        const li = document.createElement("li");
+        li.innerText = "No friends found";
+        list.appendChild(li);
+        return;
+      }
+      
+      data.forEach(f => {
+        const li = document.createElement("li");
+        li.innerText = f;
+        list.appendChild(li);
+      });
+    }
+
+    async function deleteUser() {
+      const name = document.getElementById("deleteUser").value;
+      await fetch(`/users/${name}`, {
+        method: "DELETE"
+      });
+
+      alert(`Deleted User ${name}`);
+    }
+  </script>
+</body>
+</html>
