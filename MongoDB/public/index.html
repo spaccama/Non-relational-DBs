@@ -1,15 +1,34 @@
 <!DOCTYPE html>
-<html>
+<html lang="it">
 <head>
-  <title>Mongo Todo</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo App - MongoDB</title>
+  <link rel="stylesheet" href="../style/style.css">
 </head>
 <body>
-  <h1>Todo App</h1>
+  <div class="container">
+    <header class="header">
+      <h1>📝 My Tasks</h1>
+      <p class="subtitle">Organizza il tuo giorno</p>
+    </header>
 
-  <input id="todoInput" placeholder="Enter todo" />
-  <button onclick="addTodo()">Add</button>
+    <div class="input-section">
+      <input 
+        id="todoInput" 
+        type="text"
+        placeholder="Aggiungi una nuova attività..." 
+        onkeypress="handleKeyPress(event)"
+      />
+      <button onclick="addTodo()" class="btn-add">Aggiungi</button>
+    </div>
 
-  <ul id="todoList"></ul>
+    <ul id="todoList" class="todo-list"></ul>
+
+    <div id="emptyState" class="empty-state">
+      <p>✨ Nessuna attività. Crea la tua prima task!</p>
+    </div>
+  </div>
 
   <script>
     async function fetchTodos() {
@@ -17,25 +36,42 @@
       const todos = await res.json();
 
       const list = document.getElementById('todoList');
+      const emptyState = document.getElementById('emptyState');
       list.innerHTML = '';
+
+      if (todos.length === 0) {
+        emptyState.style.display = 'block';
+        return;
+      }
+
+      emptyState.style.display = 'none';
 
       todos.forEach(t => {
         const li = document.createElement('li');
+        li.className = 'todo-item';
 
         const span = document.createElement('span');
+        span.className = 'todo-text';
         span.innerText = t.text;
 
+        const actions = document.createElement('div');
+        actions.className = 'todo-actions';
+
         const editBtn = document.createElement('button');
-        editBtn.innerText = 'Edit';
+        editBtn.className = 'btn-edit';
+        editBtn.innerText = '✏️ Modifica';
         editBtn.onclick = () => updateTodo(t._id);
 
         const deleteBtn = document.createElement('button');
-        deleteBtn.innerText = 'Delete';
+        deleteBtn.className = 'btn-delete';
+        deleteBtn.innerText = '🗑️ Elimina';
         deleteBtn.onclick = () => deleteTodo(t._id);
 
+        actions.appendChild(editBtn);
+        actions.appendChild(deleteBtn);
+
         li.appendChild(span);
-        li.appendChild(editBtn);
-        li.appendChild(deleteBtn);
+        li.appendChild(actions);
 
         list.appendChild(li);
       });
@@ -43,7 +79,12 @@
 
     async function addTodo() {
       const input = document.getElementById('todoInput');
-      const text = input.value;
+      const text = input.value.trim();
+
+      if (!text) {
+        alert('Per favore inserisci un\'attività');
+        return;
+      }
 
       await fetch('/todos', {
         method: 'POST',
@@ -52,31 +93,41 @@
       });
 
       input.value = '';
+      input.focus();
       fetchTodos();
     }
 
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') {
+        addTodo();
+      }
+    }
+
     async function updateTodo(id) {
-      const newText = prompt('Update todo:');
-      if (!newText) return;
+      const newText = prompt('Modifica l\'attività:');
+      if (!newText || !newText.trim()) return;
 
       await fetch(`/todos/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: newText })
+        body: JSON.stringify({ text: newText.trim() })
       });
 
       fetchTodos();
     }
 
     async function deleteTodo(id) {
-      await fetch(`/todos/${id}`, {
-        method: 'DELETE'
-      });
+      if (confirm('Sei sicuro di voler eliminare questa attività?')) {
+        await fetch(`/todos/${id}`, {
+          method: 'DELETE'
+        });
 
-      fetchTodos();
+        fetchTodos();
+      }
     }
 
     fetchTodos();
+    setInterval(fetchTodos, 5000);
   </script>
 </body>
 </html>

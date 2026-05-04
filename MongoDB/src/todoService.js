@@ -2,17 +2,24 @@ import { getDb } from "./mongoClient.js";
 import { ObjectId } from "mongodb";
 
 export async function addTodo(text) {
-  // TODO: insert document into "todos"
+  const db = getDb()
+  return await db.collection("todos").insertOne({ text, completed: false })
 }
 
 export async function getTodos() {
-  // TODO: return all documents from "todos"
+  const db = getDb()
+  return await db.collection("todos").find().toArray()
 }
 
 export async function updateTodo(id, text) {
-  // TODO: update document by _id
+  const db = getDb()
+  return await db.collection("todos").updateOne(
+    { _id: new ObjectId(id) },
+    { $set: { text } }
+  )
 }
 
 export async function deleteTodo(id) {
-  // TODO: delete document by _id
+  const db = getDb()
+  return await db.collection("todos").deleteOne({ _id: new ObjectId(id) })
 }

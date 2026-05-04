@@ -1,15 +1,15 @@
 import client from "./cassandraClient.js";
 
 export async function addEvent(userId, eventType, page) {
-  // TODO 1:
-  // Insert into Cassandra
-  // HINT: INSERT INTO user_events (...)
+  const query =
+  "INSERT INTO user_events (user_id, event_time, event_type, page ) VALUES (?, toTimestamp(now()), ?, ?)";
+  await client.execute(query,[userId, eventType, page], {prepare:true})
 
 }
 
 export async function getRecentEvents(userId) {
-  // TODO 2:
-  // Query last events for user
-  // HINT: SELECT ... WHERE user_id = ?
+  const query =
+  "SELECT * FROM user_events (user_id, event_time, event_type, page ) VALUES (?, toTimestamp(now()), ?, ?)";
+  await client.execute(query,[userId], {prepare:true})
 
 }
