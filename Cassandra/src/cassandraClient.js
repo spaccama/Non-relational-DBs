@@ -4,9 +4,6 @@ dns.setServers(["8.8.8.8"]);
 
 import { Client } from "cassandra-driver";
 import dotenv from "dotenv";
-import dns from "dns";
-
-dns.setServers(["1.1.1.1"]);
 dotenv.config();
 
 if (!fs.existsSync(process.env.ASTRA_DB_SECURE_BUNDLE)) {
